@@ -1,0 +1,3 @@
+[submodule "jwt-authorizer"]
+	path = jwt-authorizer
+	url = https://github.com/k3a/jwt-authorizer
