@@ -46,6 +46,6 @@ class action_plugin_authjwt extends DokuWiki_Action_Plugin {
         $this->print_login_unavailable_msg();
 
         $event->data = new Doku_Form(array());
-        //$event->data->addElement('<a href="' . wl($ID, array('do' => 'login')) . '">Login here</a>');
+        $event->data->addElement('<a href="' . wl($ID, array('do' => 'login')) . '">Login here</a>');
     }
 }
