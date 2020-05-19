@@ -17,8 +17,8 @@ class auth_plugin_authjwt extends DokuWiki_Auth_Plugin /* auth_plugin_authplain 
   public function __construct() {
     parent::__construct();
     
-    /* No support for logout in this auth plugin. */
-    $this->cando['logout'] = false;
+    /* Supports logOff() method */
+    $this->cando['logout'] = true;
     /* This plugins uses it's own authentication. */
     $this->cando['external'] = true;
     
@@ -86,6 +86,16 @@ class auth_plugin_authjwt extends DokuWiki_Auth_Plugin /* auth_plugin_authplain 
     $_SESSION[DOKU_COOKIE]["auth"]["info"] = $USERINFO;
     
     return true;
+  }
+
+  public function logOff() {
+    // clear cookies
+    setcookie(DOKU_COOKIE, "", time() - 3600);
+    setcookie("_admin_auth", "", time() - 3600);
+    setcookie("_admin_auth_user_name", "", time() - 3600);
+
+    // redirect to home
+    send_redirect(DOKU_URL);
   }
 
 }
