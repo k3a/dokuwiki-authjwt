@@ -1,5 +1,0 @@
-base   authjwt
-author K3A
-date   2020-05-16
-name   JWT Auth Plugin
-desc   Authenticate against JWT token

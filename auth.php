@@ -95,7 +95,9 @@ class auth_plugin_authjwt extends DokuWiki_Auth_Plugin /* auth_plugin_authplain 
     setcookie("_admin_auth_user_name", "", time() - 3600);
 
     // redirect to home
-    send_redirect(DOKU_URL);
+	if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) != '/') {
+		send_redirect(DOKU_URL);
+	}
   }
 
 }
