@@ -9,7 +9,7 @@
 // must be run within Dokuwiki
 if(!defined('DOKU_INC')) die();
 
-class auth_plugin_authjwt extends DokuWiki_Auth_Plugin /* auth_plugin_authplain */ {
+class auth_plugin_authjwt extends DokuWiki_Auth_Plugin {
 
   /**
    * Constructor.
@@ -49,11 +49,15 @@ class auth_plugin_authjwt extends DokuWiki_Auth_Plugin /* auth_plugin_authplain 
   public function trustExternal($user, $pass, $sticky=false) {
     global $USERINFO;
 
+    if (!$this->success) {
+      return false;
+    }
+
     $jav = new JWTAuthVerifier($this->getConf("issuers"), $this->getConf("cachekey"));
 
     if (!$jav->hasToken()) {
       // no token provided
-      return;
+      return false;
     }
 
     if (!$jav->verify()) {
@@ -89,15 +93,22 @@ class auth_plugin_authjwt extends DokuWiki_Auth_Plugin /* auth_plugin_authplain 
   }
 
   public function logOff() {
+    // unset session data
+    if (isset($_SESSION[DOKU_COOKIE]["auth"]["user"])) {
+      unset($_SESSION[DOKU_COOKIE]["auth"]["user"]);
+    }
+    if (isset($_SESSION[DOKU_COOKIE]["auth"]["info"])) {
+        unset($_SESSION[DOKU_COOKIE]["auth"]["info"]);
+    }
+
     // clear cookies
-    setcookie(DOKU_COOKIE, "", time() - 3600);
     setcookie("_admin_auth", "", time() - 3600);
     setcookie("_admin_auth_user_name", "", time() - 3600);
 
     // redirect to home
-	if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) != '/') {
-		send_redirect(DOKU_URL);
-	}
+    if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) != '/') {
+        send_redirect(DOKU_URL);
+    }
   }
 
 }
