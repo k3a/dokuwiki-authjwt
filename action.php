@@ -12,8 +12,9 @@ if(!defined('DOKU_INC')) die();
 class action_plugin_authjwt extends DokuWiki_Action_Plugin {
   
   function register(Doku_Event_Handler $controller){
-    $controller->register_hook('ACTION_ACT_PREPROCESS', 'AFTER', $this, 'skip_login_action', NULL);
-    $controller->register_hook('HTML_LOGINFORM_OUTPUT', 'BEFORE', $this, 'handle_loginform');
+    $controller->register_hook('ACTION_ACT_PREPROCESS', 'AFTER', $this, 'skipLoginAction', NULL);
+    $controller->register_hook('HTML_LOGINFORM_OUTPUT', 'BEFORE', $this, 'handleOldLoginForm'); // deprecated
+    $controller->register_hook('FORM_LOGIN_OUTPUT', 'BEFORE', $this, 'handleLoginForm');
   }
 
   function print_login_unavailable_msg() {
@@ -23,9 +24,7 @@ class action_plugin_authjwt extends DokuWiki_Action_Plugin {
   /**
    * Event handler to skip the 'login' action
    */
-  function skip_login_action(&$event, $param) {
-    /* Some actions handled in inc/actions.php:act_dispatch() result in $ACT
-       being modified to 'login', eg. 'register'. */
+  function skipLoginAction(&$event, $param) {
     if($event->data == 'login') {
         $this->print_login_unavailable_msg();
     }
@@ -37,7 +36,7 @@ class action_plugin_authjwt extends DokuWiki_Action_Plugin {
      * @param Doku_Event $event
      * @param $param
      */
-    public function handle_loginform(Doku_Event $event, $param)
+    public function handleOldLoginForm(Doku_Event $event, $param)
     {
         global $ID;
         global $conf;
@@ -47,5 +46,23 @@ class action_plugin_authjwt extends DokuWiki_Action_Plugin {
 
         $event->data = new Doku_Form(array());
         $event->data->addElement('<a href="' . wl($ID, array('do' => 'login')) . '">Login here</a>');
+    }
+
+    public function handleLoginForm(Doku_Event $event)
+    {
+        global $ID;
+        global $conf;
+        if ($conf['authtype'] != 'authjwt') return;
+
+        /** @var Form $form */
+        $form = $event->data;
+
+        // remove login form
+        do {
+            $form->removeElement(0);
+        } while ($form->elementCount() > 0);
+
+        //$event->data->addHTML('<a href="' . wl($ID, array('do' => 'login')) . '">Login here</a>');
+        $form->addFieldsetClose();
     }
 }
