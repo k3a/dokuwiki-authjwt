@@ -37,6 +37,10 @@ class auth_plugin_authjwt extends DokuWiki_Auth_Plugin {
       if (empty($this->getConf("cachekey"))) {
         throw new Exception("config parameter 'cachekey' must be set to a non-empty string");
       }
+
+      if (empty($this->getConf("audience"))) {
+        throw new Exception("config parameter 'audience' must be set to a non-empty string (the aud claim your IdP puts in the token, e.g. traefik_forward_auth)");
+      }
     }
     catch (Exception $e) {
       msg($e->getMessage());
@@ -53,7 +57,7 @@ class auth_plugin_authjwt extends DokuWiki_Auth_Plugin {
       return false;
     }
 
-    $jav = new JWTAuthVerifier($this->getConf("issuers"), $this->getConf("cachekey"));
+    $jav = new JWTAuthVerifier($this->getConf("issuers"), $this->getConf("cachekey"), '', $this->getConf("audience"));
 
     if (!$jav->hasToken()) {
       // no token provided
